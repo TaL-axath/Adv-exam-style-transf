@@ -1,0 +1,53 @@
+import torch
+import torch.optim as optim
+import torch.nn as nn
+
+import torch.nn.functional as F
+
+from PIL import Image
+import copy
+import os
+from utils import ImageLoader, load_image, save_image
+from attack import attack
+
+
+if __name__ == '__main__':
+    # 指定模型缓存目录
+    os.environ['TORCH_HOME'] = './model'  # 这里填写你希望存储模型的目录
+
+    content_folder = './content-image/'
+    style_folder = './style-image/'
+    content_imageloader = ImageLoader(content_folder)
+    style_imageloader = ImageLoader(style_folder)
+    print(f"content文件夹中共有 {len(content_imageloader)} 张图片。")
+    print(f"style文件夹中共有 {len(style_imageloader)} 张图片。")
+
+    for i in range(len(content_imageloader)):
+        image = content_imageloader[i]
+        image_name = content_imageloader.get_filename(i)
+        image_name = image_name.split('.')[0]
+        for j in range(len(style_imageloader)):
+            style_image = style_imageloader[j]
+            style_image_name = style_imageloader.get_filename(j)
+            style_image_name = style_image_name.split('.')[0]
+            print(f"content图片名称: {image_name}")
+            print(f"style图片名称: {style_image_name}")
+            content_img = load_image(image)
+            style_img = load_image(style_image)
+            result, target_class_probability = attack(content_img, style_img)
+            save_image(result, f'./output-image/{image_name}_{style_image_name}_{target_class_probability}.jpg')
+
+
+
+
+    content_image_path = 'content-image/content.jpg'
+    style_image_path = 'style-image/style.jpg'
+    output_image_path = './output_img.jpg'
+
+    content_img = load_image(content_image_path)
+    style_img = load_image(style_image_path)
+
+    result, target_class_probability = style_transfer(content_img, style_img)
+
+    save_image(result, output_image_path)
+    print(f"风格迁移完成，图像已保存为 {output_image_path}")
