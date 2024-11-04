@@ -3,8 +3,8 @@ from utils import ImageLoader, load_image, save_image
 from attack import attack
 
 if __name__ == '__main__':
-    # 指定模型缓存目录
-    os.environ['TORCH_HOME'] = './model'  # 这里填写你希望存储模型的目录
+    # 指定模型存储目录
+    os.environ['TORCH_HOME'] = './model'
 
     content_folder = './content-image/'
     style_folder = './style-image/'
@@ -28,6 +28,6 @@ if __name__ == '__main__':
             result, target_class_probability = attack(content_img, style_img)
             target_class_probability = target_class_probability.cpu().detach().numpy()
             print(f"对抗样本的概率为 {target_class_probability}")
-            output_image_path = f'./output-image/{image_name}_{style_image_name}_{target_class_probability}.jpg'
+            output_image_path = f'./output-image-test/{image_name}_{style_image_name}_{target_class_probability}.jpg'
             save_image(result, output_image_path)
             print(f"对抗样本生成，图像已保存为 {output_image_path}")

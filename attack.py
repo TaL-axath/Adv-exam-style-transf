@@ -4,6 +4,7 @@ from model import VGG
 from loss import ContentLoss, StyleLoss
 import torchvision.transforms as transforms
 import torch.nn.functional as F
+import torch.nn as nn
 
 
 def attack(content_img, style_img, num_steps=500, target_class=498, style_weight=1e8, content_weight=2, class_weight=1):
@@ -13,6 +14,8 @@ def attack(content_img, style_img, num_steps=500, target_class=498, style_weight
     style_img = style_img.to(device)
 
     model = VGG().to(device)
+    target_label = torch.tensor([target_class], dtype=torch.long).to(device)
+    criterion = nn.CrossEntropyLoss()
 
     # 提取风格和内容特征
     style_features, _ = model(style_img)
@@ -48,7 +51,8 @@ def attack(content_img, style_img, num_steps=500, target_class=498, style_weight
             for sl, input_f in zip(style_losses, input_features):
                 style_loss += style_weight * sl(input_f)
 
-            classfication_loss = -class_weight * torch.mean(input_classification[:, target_class])
+            classfication_loss = criterion(input_classification, target_label)
+            classfication_loss = class_weight * classfication_loss
 
             loss = content_loss + style_loss + classfication_loss
             loss.backward()
